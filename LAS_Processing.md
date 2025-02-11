@@ -1,5 +1,5 @@
 ---
-title: "Classification"
+title: "Classification and Height Normalization"
 author: "Noah Fried"
 date: "2024-10-18"
 output: github_document
@@ -14,13 +14,12 @@ This is an online textbook which contains a more in depth description of the con
 browseVignettes(package = "lidR")
 ```
 
-[Click to view Vingette](http://127.0.0.1:13483/session/Rvig.50c03f6417f2.html) 
-
-# Install Required Packages and Libraries 
+# Install Packages and Load Libraries 
 Before proceeding, ensure the necessary libraries are installed. The following packages are needed to process individual LAS files (more libraries will be introduced when working with catalogs): 
 ```{r, eval = FALSE}
 install.packages("lidR")
 install.packages("raster")
+
 library(lidR)
 library(raster)
 ```
@@ -166,5 +165,62 @@ plot(gnd, size = 3, bg = "white", color = "Classification")
 This helps visually validate the ground classification and height normalization. 
 
 
+
+# What is Height Normalization 
+
+Height normalization is the process of adjusting the elevation of LiDAR points to reflect their height relative to the ground, rather than their absolute elevation above sea level or the ellipsoid. It’s used to standardize the height of objects in point cloud data, such as vegetation, buildings, or other structures, making it easier to analyze features above the ground surface.
+
+# Visualizing Non-normalized Terrain 
+
+Visualize non-Normalized terrain: 
+```{r , eval = FALSE}
+LASfile <- system.file("extdata", "Topography.laz", package="lidR")
+las <- readLAS(LASfile)
+plot(las, size = 3, bg = "white")
+```
+
+This is a good starting point before starting analysis. 
+
+Get an idea of what the ground looks like :
+
+
+```{r , eval = FALSE}
+gnd <- filter_ground(las)
+plot(gnd, size = 3, bg = "white", color = "Classification")
+```
+
+# Height Normalization Methods 
+
+There are several popular normalization methods: 
+
+1.  **Subtract the derived raster DTM elevation** from all non-ground returns.
+2. **Interpolate ground points directly** and subtract beneath the non-ground returns.
+
+## Digital Terrain Models 
+
+The creation of DTM is usually the second step following ground classification. These models basically produce images of the ground. There are many practical uses of DTM but for this we are using them to normalize point clouds. The first lets look at creating the DTM the **rasterize_terrain()** function accomplishes that
+```{r, eval = FALSE}
+dtm <- rasterize_terrain(las, 1, knnidw())
+plot(dtm, col = gray(1:50/50))
+writeRaster(dtm, filename = "E:/Laz Files/dtm_Las.tif")
+```
+
+This creates a a DTM while also saving it as a raster file for further viewing in a GIS package like ArcGIS or QGIS. After this you can use this newly created DTM model and subtract it from your original LAS file. You are subtracting ground elevation from the Lidars points absolute height resulting in height above ground level (relative height)
+
+This is how you normalize the height in this method and 3D viewing can be plotted in the same ways mentioned earlier 
+```{r, eval = FALSE}
+nlas <- las - dtm
+plot(nlas, size = 4, bg = "white")
+```
+
+
+## Inverse Distance Weighted
+
+Another common way to normalize height is through interpolation. IDW is a popular method to do that. The **normalize_height()** function accomplishes that 
+```{r, eval = FALSE}
+nlas <- normalize_height(las, knnidw())
+```
+
+This uses IDW to make guesses on the height a points. The parameters are set to default. There are other interpolation methods as well as parameters you can mess around with found in the Lidr package online text book I encourage you to look through. 
 
 
