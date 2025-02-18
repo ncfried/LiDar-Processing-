@@ -2,37 +2,47 @@
 title: "Standard Metrics"
 author: "Noah Fried"
 date: "2025-02-18"
-output:
-  html_document:
-    df_print: paged
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-# Multiband Stacked Raster Workflow Post Height Normalization 
+
+# Delete and Remove ALL unnecessary variables 
+```{r}
+rm(list = ls())
+gc()
+```
 
 # Libraries
+```{r}
 library(lidR)
 library(terra)
 library(future)
+```
 
-rm(list = ls())
-gc()
-
-# Define output paths for first return metrics
-folder<- readline(prompt = "Enter las directory path: ")
+# Define output paths for metrics
+```{r}
+folder<- readline(prompt = "Enter catalog (normalized) directory path: ")
 out_dir<- readline(prompt = "Enter output directory path: ")
 out_suffix <- readline(prompt = "Enter suffix: ")
-user_cell_size <- 1 #in meters
+user_cell_size <- 1 #in meters make sure
+```
 
 # Load Normalized Catalog 
+```{r}
 ctg = suppressWarnings(readLAScatalog(folder, progress = TRUE, filter="-drop_withheld -drop_z_below -1"))
+```
+
 
 # Filter
+```{r}
 opt_select(ctg) <- "xyzciReturnNumber"
+```
 
+```{r}
 ## make output file name *remove outsuffix if not needed
 opt_output_files(ctg)<-paste0(out_dir, "\\", out_suffix, "_{ID}")
 
@@ -74,7 +84,11 @@ metrics_custom <- function(z, Classification, RetNum, threshold = 0) {
   )
 }
 
+
+```
+
 # Compute all  metrics
+```{r}
 plan(multisession, workers = 4)
 result <- lidR::pixel_metrics(
   ctg,
@@ -82,6 +96,6 @@ result <- lidR::pixel_metrics(
   res = user_cell_size
 )
 
-
+```
 
 
