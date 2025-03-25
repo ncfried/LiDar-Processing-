@@ -79,7 +79,7 @@ To ensure the integrity of my ***LAS catalog (ctg)*** and any derived datasets (
 In order to make the processing of a catalog more efficient **.LAS** files must be indexed into **.LAX** files. It generates a spatial index that helps the lidR package quickly locate and access the LAS files and their associated data within the catalog based on spatial queries. This indexing allows for faster processing of point clouds and makes it easier to manage large data sets. Doing for each derived dataset will save you time and headaches while processing your Lidar.
 
 ```{r message=FALSE, warning=FALSE}
-#lidR:::catalog_laxindex(ctg) 
+lidR:::catalog_laxindex(ctg) 
 ```
 
 ## Parallel Processing
@@ -101,7 +101,7 @@ This should be ran immediately before your processing task.
 
 The primary task is to break down data into smaller subsets that can be processed independently or in parallel. This division is particularly beneficial in managing memory usage, as processing data in chunks allows for effective utilization of system resources. Instead of loading an entire dataset into memory, which can lead to memory overload, chunking enables the system to handle smaller segments at a time. I have been using **chunk_size <- 100** has given me the best and speediest results despite the warning. I think you need to play around with it and each catalog will require different chunk sizes.
 
-Since the edges of chunks have fewer points to base calculations on, you create a **chunk_buffer** to incorporate data from neighboring chunks. This ensures that boundary points are processed with the same context as interior points, reducing edge effects and improving the accuracy of classification, interpolation, and other LiDAR processing tasks.
+Since the edges of chunks have fewer points to base calculations on, you create a **chunk_buffer** to incorporate data from neighboring chunks. This ensures that boundary points are processed with the same context as interior points, reducing edge effects and improving the accuracy of classification, interpolation, and other LiDAR processing tasks. Make sure you run this after each process so catalog, classified, dtm, and height normalized processes have a chunk size and buffer  
 
 ```{r message=FALSE, warning=FALSE}
 opt_chunk_size(ctg) <- 250
