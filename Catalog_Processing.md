@@ -122,6 +122,9 @@ The csf() function is highly configurable, with various options to fine-tune its
 While **CSF performs exceptionally well in hilly, mountainous, and highly variable terrain**, it may not be the best choice for **flat landscapes**. If working with relatively level terrain, consider alternative classification methods that might yield better results.
 
 ```{r}
+opt_output_files(ctg)<- "<your_directory/>_classifiedcatalogFolder/{XLEFT}_{YBOTTOM}_class"
+plan(multisession, workers = 2)
+set_lidr_threads(2L)
 mycsf <- csf(sloop_smooth = TRUE, cloth_resolution = 1 )
 ctg_classified <- classify_ground(ctg, mycsf)
 
